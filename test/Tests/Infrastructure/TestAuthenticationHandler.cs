@@ -13,7 +13,7 @@ namespace Tests.Infrastructure
     
     public class TestAuthenticationHandler : AuthenticationHandler<TestAuthenticationOptions>
     {
-        public TestAuthenticationHandler(IOptionsMonitor<TestAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        public TestAuthenticationHandler(IOptionsMonitor<TestAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
         {
         }
 

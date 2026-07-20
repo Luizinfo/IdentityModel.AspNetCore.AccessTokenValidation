@@ -1,16 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>ZinfoFramework.IdentityModel.AspNetCore.AccessTokenValidation</PackageId>
+    <Version>10.0.0</Version>
+    <MinVerVersionOverride>10.0.0</MinVerVersionOverride>
+    <AssemblyName>IdentityModel.AspNetCore.AccessTokenValidation</AssemblyName>
+    <RootNamespace>IdentityModel.AspNetCore.AccessTokenValidation</RootNamespace>
+    <Authors>Luiz Antonio</Authors>
+    <Copyright>Copyright Dominick Baier &amp; Brock Allen</Copyright>
+    <Description>ZinfoFramework independent continuation of ASP.NET Core helpers for flexible access token validation with JWT and reference tokens.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/Luizinfo/IdentityModel.AspNetCore.AccessTokenValidation</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>ZinfoFramework;OAuth2;OAuth 2.0;Security;Identity;Access Token;ASP.NET Core;independent continuation</PackageTags>
+    <PackageReleaseNotes>ZinfoFramework 10.0.0 independent continuation targeting .NET 10 while preserving the historical assembly, namespaces, and API.</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/Luizinfo/IdentityModel.AspNetCore.AccessTokenValidation.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\NOTICE.md" Pack="true" PackagePath="" />
+    <None Include="..\CHANGELOG.md" Pack="true" PackagePath="" />
+    <None Include="..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="2.3.0">
+    <PackageReference Include="MinVer" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

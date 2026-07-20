@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Threading.Tasks;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -9,10 +10,12 @@ namespace build
     {
         private const string packOutput = "./artifacts";
         private const string envVarMissing = " environment variable is missing. Aborting.";
+        private const string nugetConfigEnvironmentVariable = "ACCESSTOKENVALIDATION_NUGET_CONFIG";
 
         private static class Targets
         {
             public const string RestoreTools = "restore-tools";
+            public const string Restore = "restore";
             public const string CleanBuildOutput = "clean-build-output";
             public const string CleanPackOutput = "clean-pack-output";
             public const string Build = "build";
@@ -22,11 +25,21 @@ namespace build
             public const string SignPackage = "sign-package";
         }
 
-        internal static void Main(string[] args)
+        internal static async Task Main(string[] args)
         {
             Target(Targets.RestoreTools, () =>
             {
                 Run("dotnet", "tool restore");
+            });
+
+            Target(Targets.Restore, () =>
+            {
+                var nugetConfig = Environment.GetEnvironmentVariable(nugetConfigEnvironmentVariable);
+                var configArgument = string.IsNullOrWhiteSpace(nugetConfig)
+                    ? string.Empty
+                    : $" --configfile \"{nugetConfig}\"";
+
+                Run("dotnet", $"restore ./IdentityModel.AspNetCore.AccessTokenValidation.sln --nologo{configArgument}");
             });
 
             Target(Targets.CleanBuildOutput, () =>
@@ -34,9 +47,9 @@ namespace build
                 Run("dotnet", "clean -c Release -v m --nologo");
             });
 
-            Target(Targets.Build, DependsOn(Targets.CleanBuildOutput), () =>
+            Target(Targets.Build, DependsOn(Targets.Restore, Targets.CleanBuildOutput), () =>
             {
-                Run("dotnet", "build -c Release --nologo");
+                Run("dotnet", "build -c Release --no-restore --nologo");
             });
 
             Target(Targets.SignBinary, DependsOn(Targets.Build, Targets.RestoreTools), () =>
@@ -46,7 +59,7 @@ namespace build
 
             Target(Targets.Test, DependsOn(Targets.Build), () =>
             {
-                Run("dotnet", "test -c Release --no-build --nologo");
+                Run("dotnet", "test -c Release --no-build --no-restore --nologo");
             });
 
             Target(Targets.CleanPackOutput, () =>
@@ -59,7 +72,7 @@ namespace build
 
             Target(Targets.Pack, DependsOn(Targets.Build, Targets.CleanPackOutput), () =>
             {
-                Run("dotnet", $"pack ./src/IdentityModel.AspNetCore.AccessTokenValidation.csproj -c Release -o {Directory.CreateDirectory(packOutput).FullName} --no-build --nologo");
+                Run("dotnet", $"pack ./src/IdentityModel.AspNetCore.AccessTokenValidation.csproj -c Release -o {Directory.CreateDirectory(packOutput).FullName} --no-build --no-restore --nologo -p:MinVerVersionOverride=10.0.0");
             });
 
             Target(Targets.SignPackage, DependsOn(Targets.Pack, Targets.RestoreTools), () =>
@@ -71,7 +84,7 @@ namespace build
 
             Target("sign", DependsOn(Targets.SignBinary, Targets.Test, Targets.SignPackage));
 
-            RunTargetsAndExit(args, ex => ex is SimpleExec.NonZeroExitCodeException || ex.Message.EndsWith(envVarMissing));
+            await RunTargetsAndExitAsync(args, ex => ex is SimpleExec.ExitCodeException || ex.Message.EndsWith(envVarMissing));
         }
 
         private static void Sign(string path, string searchTerm)
