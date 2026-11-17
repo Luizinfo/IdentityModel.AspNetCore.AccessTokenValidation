@@ -39,3 +39,9 @@ The leastprivilege article associated with the historical project remains useful
 - [Notice](https://github.com/Luizinfo/IdentityModel.AspNetCore.AccessTokenValidation/blob/main/NOTICE.md)
 - [Support policy](https://github.com/Luizinfo/IdentityModel.AspNetCore.AccessTokenValidation/blob/main/SUPPORT.md)
 - [Security policy](https://github.com/Luizinfo/IdentityModel.AspNetCore.AccessTokenValidation/blob/main/SECURITY.md)
+
+## Build and pull-request validation
+
+Install the exact .NET SDK **10.0.401** selected by `global.json`. Run `./build.ps1` on Windows or `./build.sh` on Linux/macOS from the repository root. The default build compiles the solution, runs its tests, and creates local validation packages. CI installs the same SDK from `global.json` and checks Windows, Linux, and macOS. It runs for pull requests and correction/release branches without publishing packages.
+
+Unreleased build changes do not replace the existing NuGet release. A future publication requires a new package version and validation of the final artifacts.
