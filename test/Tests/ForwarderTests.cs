@@ -59,7 +59,7 @@ namespace Tests
         }
         
         [Fact]
-        public void introspection_forwarder_with_default_scheme_and_reference_token_should_call_Introspection_handler()
+        public async Task introspection_forwarder_with_default_scheme_and_reference_token_should_call_Introspection_handler()
         {
             var server = new Server
             {
@@ -72,12 +72,12 @@ namespace Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "reference");
         
             Func<Task> act = async () => { await client.SendAsync(request); };
-            act.Should().Throw<InvalidOperationException>()
-                .Where(e => e.Message.StartsWith("No authentication handler is registered for the scheme 'Introspection'"));
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .Where(e => e.Message.StartsWith("No authentication handler is registered for the scheme 'introspection'"));
         }
         
         [Fact]
-        public void introspection_forwarder_with_foo_scheme_and_reference_token_should_call_foo_handler()
+        public async Task introspection_forwarder_with_foo_scheme_and_reference_token_should_call_foo_handler()
         {
             var server = new Server
             {
@@ -91,7 +91,7 @@ namespace Tests
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "reference");
         
             Func<Task> act = async () => { await client.SendAsync(request); };
-            act.Should().Throw<InvalidOperationException>()
+            await act.Should().ThrowAsync<InvalidOperationException>()
                 .Where(e => e.Message.StartsWith("No authentication handler is registered for the scheme 'foo'"));
         }
         

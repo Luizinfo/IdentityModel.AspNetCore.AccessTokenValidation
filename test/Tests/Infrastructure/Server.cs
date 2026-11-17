@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Tests.Infrastructure
 {
@@ -18,48 +19,41 @@ namespace Tests.Infrastructure
         
         public TestServer CreateServer()
         {
-            return new TestServer(new WebHostBuilder()
-                .ConfigureServices(services =>
+            var host = new HostBuilder()
+                .ConfigureWebHost(webHostBuilder =>
                 {
-                    var builder = services.AddAuthentication("test");
-                    builder.AddScheme<TestAuthenticationOptions, TestAuthenticationHandler>("test", o =>
-                    {
-                        if (AddForwarder)
+                    webHostBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
                         {
-                            if (!string.IsNullOrEmpty(ForwardScheme))
+                            var builder = services.AddAuthentication("test");
+                            builder.AddScheme<TestAuthenticationOptions, TestAuthenticationHandler>("test", o =>
                             {
-                                o.ForwardDefaultSelector = Selector.ForwardReferenceToken(ForwardScheme);
-                            }
-                            else
-                            {
-                                o.ForwardDefaultSelector = Selector.ForwardReferenceToken();
-                            }
-                        }
-                    });
-                    
-                    
+                                if (AddForwarder)
+                                {
+                                    o.ForwardDefaultSelector = !string.IsNullOrEmpty(ForwardScheme)
+                                        ? Selector.ForwardReferenceToken(ForwardScheme)
+                                        : Selector.ForwardReferenceToken();
+                                }
+                            });
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseAuthentication();
 
+                            app.Run(context =>
+                            {
+                                var user = context.User;
+
+                                context.Response.StatusCode = user.Identity.IsAuthenticated ? 200 : 401;
+
+                                return Task.CompletedTask;
+                            });
+                        });
                 })
-                .Configure(app =>
-                {
-                    app.UseAuthentication();
+                .Start();
 
-                    app.Use((context, next) =>
-                    {
-                        var user = context.User;
-
-                        if (user.Identity.IsAuthenticated)
-                        {
-                            context.Response.StatusCode = 200;
-                        }
-                        else
-                        {
-                            context.Response.StatusCode = 401;
-                        }
-
-                        return Task.CompletedTask;
-                    });
-                }));
+            return host.GetTestServer();
         }
         
         public HttpClient CreateClient()

@@ -201,6 +201,9 @@ docs/_build/
 # Local .NET CLI tools
 tools/
 
+# Build artifacts
+artifacts/
+
 # Rider
 .idea
 
