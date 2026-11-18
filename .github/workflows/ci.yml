@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'release/**', 'fix/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-26-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./build.ps1
+      - if: runner.os != 'Windows'
+        run: ./build.sh
